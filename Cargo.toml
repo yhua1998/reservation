@@ -1,3 +1,7 @@
 [workspace]
-members = ["abi", "reservation", "service"]
+members = [
+  "abi",
+  "reservation",
+  "service",
+]
 resolver = "2"
