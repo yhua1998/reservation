@@ -197,3 +197,10 @@ CREATE TRIGGER reservations_trigger
 ## Core flow
 
 ![](./asserts/arch2.png)
+
+## Unresolved questions
+
+- how to handle repeated reservation? - is this more ore less a business logic which shuldn't be put into this layer?(non-goal: we consider this is a business logic and should be handled by the caller)
+- if load is big, we may use an external queue for recording changes.
+- we haven't considered tracking/observability/deployment yes.
+- query perfoirmance might be an issue - need to revisit the index and also consider using cache.
