@@ -1,4 +1,4 @@
-use std::ops::{Bound, Range};
+use std::ops::Bound;
 
 use sqlx::{
     postgres::{types::PgRange, PgRow},
@@ -9,7 +9,9 @@ use sqlx::{
     FromRow, Row,
 };
 
-use crate::{utils::*, Error, Reservation, ReservationStatus, RsvpStatus};
+use crate::{utils::*, Error, Reservation, ReservationStatus, RsvpStatus, Validator};
+
+use super::{get_timespan, validate_range};
 
 impl Reservation {
     pub fn new_pending(
@@ -30,7 +32,13 @@ impl Reservation {
         }
     }
 
-    pub fn validate(&self) -> Result<(), Error> {
+    pub fn get_timespan(&self) -> PgRange<DateTime<Utc>> {
+        get_timespan(self.start.as_ref(), self.end.as_ref())
+    }
+}
+
+impl Validator for Reservation {
+    fn validate(&self) -> Result<(), Error> {
         if self.user_id.is_empty() {
             return Err(Error::InvalidUserId(self.user_id.clone()));
         }
@@ -38,25 +46,10 @@ impl Reservation {
         if self.resource_id.is_empty() {
             return Err(Error::InvalidResourceId(self.resource_id.clone()));
         }
-        if self.start.is_none() || self.end.is_none() {
-            return Err(Error::InvalidTime);
-        }
 
-        let start: DateTime<Utc> = convert_to_utc_time(self.start.as_ref().unwrap().clone());
-        let end: DateTime<Utc> = convert_to_utc_time(self.end.as_ref().unwrap().clone());
-
-        if start >= end {
-            return Err(Error::InvalidTime);
-        }
+        validate_range(self.start.as_ref(), self.end.as_ref())?;
 
         Ok(())
-    }
-
-    pub fn get_timespan(&self) -> Range<DateTime<Utc>> {
-        let start = convert_to_utc_time(self.start.as_ref().unwrap().clone());
-        let end = convert_to_utc_time(self.end.as_ref().unwrap().clone());
-
-        Range { start, end }
     }
 }
 
