@@ -13,7 +13,7 @@ BEGIN
     (NEW.id, 'create');
   ELSEIF TG_OP = 'UPDATE' THEN
     IF OLD.status <> NEW.status THEN
-      INSERT INTO rsvp.reservation_chanegs (reservation_id,op)
+      INSERT INTO rsvp.reservation_changes (reservation_id,op)
       VALUES (NEW.id, 'update');
     END IF;
   ELSEIF TG_OP = 'DELETE' THEN
